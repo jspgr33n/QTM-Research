@@ -1,0 +1,189 @@
+<!-- You must include this JavaScript file -->
+<script src="https://assets.crowd.aws/crowd-html-elements.js"></script>
+
+<!-- For the full list of available Crowd HTML Elements and their input/output documentation,
+      please refer to https://docs.aws.amazon.com/sagemaker/latest/dg/sms-ui-template-reference.html -->
+
+<!-- You must include crowd-form so that your task submits answers to MTurk -->
+
+<!-- File for filling in boxes can be found in /new_folder/bangladesh_df_valid_searches.csv -->
+
+<crowd-form answer-format="flatten-objects">
+  <div>
+    <strong> </strong>
+    <span> We are hoping to contact local NGOs in Bangladesh for a survey.
+      In the following task, we ask that you find the contact information of an NGO given the following information.
+    </span>
+
+    <p> </p>
+    <table>
+      <tr>
+        <td>Name of NGO:</td>
+        <td> </td>
+        <td>${ngo_name}</td>
+      </tr>
+      <tr>
+        <td>Date of NGO Expiration:</td>
+        <td> </td>
+        <td>${valid_until}</td>
+      </tr>
+      <tr>
+        <td>Type of NGO:</td>
+        <td> </td>
+        <td>${type_ngo}</td>
+      </tr>
+      <tr>
+        <td>Prefilled Search (Name only):</td>
+        <td> </td>
+        <td><a href="${text_ngo_name}" target="_blank">${text_ngo_name}</a></td>
+      </tr>
+      <tr>
+        <td>Prefilled Search (Name + "NGO Bangladesh"):</td>
+        <td> </td>
+        <td><a href="${text_ngo_name_words}" target="_blank">${text_ngo_name_words}</a></td>
+      </tr>
+    </table>
+
+    <p></p>
+    <span> Other instructions: </span>
+    <ul>
+      <li style="color:green;"> IF the NGO is outdated, FIND the most recent email </li>
+      <li style="color:green;"> SEARCH the first <strong> 2 pages </strong> of the three Google Searches BEFORE STOPPING </li>
+      <li style="color:green;"> PRIORITIZE finding contact information for local NGOs </li>
+      <li style="color:green;"> IF it is difficult to locate the NGO field, use photos on the website or translate text to obtain information </li>
+    </ul>
+    <p></p>
+    <ul>
+      <li style="color:tomato;"> AVOID, if possible, contact information of NGOs outside of Bangladesh (non-local) </li>
+    </ul>
+
+    <p></p>
+
+    <p><strong><big><big> What is this NGO's email? Where did you find it? </big></big></strong></p>
+    <p> IF the email was NOT FOUND enter the word <span style="color:tomato;"> "BLANK" </span> below. </p>
+    <p> IF NGO field is "Any Other", specify what NGO field you found. Else, enter the word <span
+        style="color:tomato;"> "BLANK" </span> below. </p>
+
+    <crowd-classifier header="Enter website information" name="website_type"
+      categories="['Local Website',  'International Website', 'Facebook/Social Media', 'Email not Found', 'Other']">
+      <classification-target>
+        <div>
+          <p><strong>Email:</strong></p>
+          <crowd-input name="email_entered" placeholder="e.g. john@harvard.edu " required />
+        </div>
+        <div>
+          <p> Enter the website you found it in
+            <crowd-input name="website_email" placeholder="e.g. www.harvard.edu/profile/john " required />
+          </p>
+        </div>
+        <div>
+          <p>Is this a local or international contact?
+            <select name="type_contact" required>
+              <option value="local">Local</option>
+              <option value="international">International</option>
+              <option value="NA">NA</option>
+            </select>
+          </p>
+        </div>
+        <div style="text-align: left;">
+          <label>Select NGO Field:</label><br>
+          <div style="display: inline-block; width: 45%;">
+            <input type="checkbox" name="ngo_field_1_anim" value="Animal Husbandry, Dairying & Fisheries"> Animal Husbandry,
+            Dairying & Fisheries<br>
+            <input type="checkbox" name="ngo_field_2_aged" value="Aged/Elderly"> Aged/Elderly<br>
+            <input type="checkbox" name="ngo_field_3_agri" value="Agriculture"> Agriculture<br>
+            <input type="checkbox" name="ngo_field_4_anim" value="Animal Welfare"> Animal Welfare<br>
+            <input type="checkbox" name="ngo_field_5_biot" value="Biotechnology"> Biotechnology<br>
+            <input type="checkbox" name="ngo_field_6_chil" value="Children"> Children<br>
+            <input type="checkbox" name="ngo_field_7_civi" value="Civic Issues"> Civic Issues<br>
+            <input type="checkbox" name="ngo_field_8_diff" value="Differently Abled"> Differently Abled<br>
+            <input type="checkbox" name="ngo_field_9_disa" value="Disaster Management"> Disaster Management<br>
+            <input type="checkbox" name="ngo_field_10_dali" value="Dalit Upliftment"> Dalit Upliftment<br>
+            <input type="checkbox" name="ngo_field_11_drin" value="Drinking Water"> Drinking Water<br>
+            <input type="checkbox" name="ngo_field_12_educ" value="Education & Literacy"> Education & Literacy<br>
+            <input type="checkbox" name="ngo_field_13_envi" value="Environment & Forests"> Environment & Forests<br>
+            <input type="checkbox" name="ngo_field_14_food" value="Food Processing"> Food Processing<br>
+            <input type="checkbox" name="ngo_field_15_aids" value="HIV/AIDS"> HIV/AIDS<br>
+            <input type="checkbox" name="ngo_field_16_hous" value="Housing"> Housing<br>
+            <input type="checkbox" name="ngo_field_17_huma" value="Human Rights"> Human Rights<br>
+            <input type="checkbox" name="ngo_field_18_info" value="Information & Communication Technology"> Information &
+            Communication Technology<br>
+            <input type="checkbox" name="ngo_field_19_lega" value="Legal Awareness & Aid"> Legal Awareness & Aid<br>
+            <input type="checkbox" name="ngo_field_20_labo" value="Labour & Employment"> Labour & Employment<br>
+            <input type="checkbox" name="ngo_field_21_land" value="Land Resources"> Land Resources<br>
+          </div>
+          <div style="display: inline-block; width: 45%;">
+            <input type="checkbox" name="ngo_field_22_micr" value="Micro Finance (SHGs)"> Micro Finance (SHGs)<br>
+            <input type="checkbox" name="ngo_field_23_mino" value="Minority Issues"> Minority Issues<br>
+            <input type="checkbox" name="ngo_field_24_micr" value="Micro Small & Medium Enterprises"> Micro Small & Medium
+            Enterprises<br>
+            <input type="checkbox" name="ngo_field_25_nren" value="New & Renewable Energy"> New & Renewable Energy<br>
+            <input type="checkbox" name="ngo_field_26_nutr" value="Nutrition"> Nutrition<br>
+            <input type="checkbox" name="ngo_field_27_panc" value="Panchayati Raj"> Panchayati Raj<br>
+            <input type="checkbox" name="ngo_field_28_pris" value="Prisoner's Issues"> Prisoner's Issues<br>
+            <input type="checkbox" name="ngo_field_29_righ" value="Right To Information & Advocacy"> Right To Information &
+            Advocacy<br>
+            <input type="checkbox" name="ngo_field_30_rura" value="Rural Development & Poverty Alleviation"> Rural
+            Development & Poverty Alleviation<br>
+            <input type="checkbox" name="ngo_field_31_scie" value="Scientific & Industrial Research"> Scientific & Industrial
+            Research<br>
+            <input type="checkbox" name="ngo_field_32_skil" value="Skill Development"> Skill Development<br>
+            <input type="checkbox" name="ngo_field_33_scie" value="Science & Technology"> Science & Technology<br>
+            <input type="checkbox" name="ngo_field_34_spor" value="Sports"> Sports<br>
+            <input type="checkbox" name="ngo_field_35_trib" value="Tribal Affairs"> Tribal Affairs<br>
+            <input type="checkbox" name="ngo_field_36_tour" value="Tourism"> Tourism<br>
+            <input type="checkbox" name="ngo_field_37_urba" value="Urban Development & Poverty Alleviation"> Urban Development &
+            Poverty Alleviation<br>
+            <input type="checkbox" name="ngo_field_38_voca" value="Vocational Training"> Vocational Training<br>
+            <input type="checkbox" name="ngo_field_39_wate" value="Water Resources"> Water Resources<br>
+            <input type="checkbox" name="ngo_field_40_wome" value="Women's Development & Empowerment"> Women's Development &
+            Empowerment<br>
+            <input type="checkbox" name="ngo_field_41_yout" value="Youth Affairs"> Youth Affairs<br>
+            <input type="checkbox" name="ngo_field_42_othe" value="Any Other"> Any Other
+          </div>
+        </div>     
+        <div>
+          <p> IF you selected "Any Other" please specify what field. Else, enter "BLANK":
+            <crowd-input name="ngo_field_specific" placeholder="Specify field" required />
+          </p>
+          <p></p>
+          <p></p>
+        </div>
+        <div>
+          <p>.
+
+          </p>
+          <p></p>
+          <p></p>
+        </div>
+        <div> </div>
+        <div style="clear: both;"></div> <!-- Clear float for checkbox columns -->
+      </classification-target>
+      <!-- Checklist for NGO types -->
+
+      <!-- Use the short-instructions section for quick instructions that the Worker
+                      will see while working on the task. Including some basic examples of 
+                      good and bad answers here can help get good results. You can include 
+                      any HTML here.   -->
+      <short-instructions>
+        Enter the email of <strong>${ngo_name}</strong>
+      </short-instructions>
+
+      <!-- Use the full-instructions section for more detailed instructions that the 
+                    Worker can open while working on the task. Including more detailed 
+                    instructions and additional examples of good and bad answers here can
+                    help get good results. You can include any HTML here. 
+              <full-instructions header="Search Relevance Instructions">
+                <p>If someone searched for <b> </b>, would this item be relevant to them?</p>
+                <div>
+                  <h4>Definition of relevance:</h4>
+
+                  <ul>
+                      <li>The item can be <strong>used directly for the interest</strong><br />
+                      (e.g. tent in <em>camping</em>)</li>
+                      <li>The item is <strong>themed towards a certain interest</strong><br />
+                      (e.g. <em>Disney Frozen</em> themed clothing)</li>
+                      <li>The item, while not directly themed for the interest, is <strong>used by interest enthusiasts</strong><br />
+                      (e.g. generic knife that people use for <em>mushroom hunting</em>, clothing used to dress up as <em>Lord of the Rings</em> (movie/book) characters)</li>
+                  </ul>
+                  <p>Note that related toys/decorations/themed it
