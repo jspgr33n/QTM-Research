@@ -1,4 +1,4 @@
-# Collecting Expert Opinions in Non-Profit Sectors for Poverty-Alleviation Plans in South Asia
+# Collecting Expert Opinions in Non-Profit Sectors for Poverty Alleviation Plans in South Asia
 > Note: Collected NGO information in Bangladesh for Fall 2023, currently working on Pakistan dataset!
 
 ### Abstract
@@ -11,15 +11,15 @@ Given two PDF files that hold Bangladesh NGO information, one local and one inte
 
 #### Preprocessing Steps:
 
-- Convert PDF to CSV
-- Move information to accurate columns
-- Remove empty columns
-- Check for empty rows and repeats
-- Change column names
-- Concatenate rows
-- Combine both datasets
+1. Convert PDF to CSV
+2. Move information to accurate columns
+3. Remove empty columns
+4. Check for empty rows and repeats
+5. Change column names
+6. Concatenate rows
+7. Combine both datasets
 
-The initial files consisted of 10 columns:
+### The initial files consisted of 10 columns:
  
 - Sl. No. (serial number)
 - Name of NGOs
@@ -40,7 +40,7 @@ The initial combined dataset had 2328 entries of local NGOs and 267 entries of i
 
 Given these NGOs, we pulled a random sample of 20 organizations and looked for information on these companies online to see how significant this dataset could be. To log findings, we created two new columns in the random sample file: info_found (“Yes” or “No”) and loc_found (website where contact was found). We searched for NGO information using these steps.
 
-Searching Steps:
+### Searching Steps:
 
 1. Search for given NGO name on a search engine, like Google
 2. If link is not found, look up NGO name with words “NGO Bangladesh”
@@ -53,7 +53,7 @@ For the 20, we were only able to find contact information for 10: a 50% success 
 
 After validation of the data and seeing that it indeed results in a high success rate, we had to look for ways to search for these NGOs and their contact information efficiently; a manual search of 1685 entries would not be ideal for a single individual. Thus, we looked into using Amazon Mechanical Turk, a crowdsourcing website where businesses can hire crowdworkers to perform discrete on-demand tasks that computers are currently unable to do as economically, to complete this task. In order for this operation to begin, we needed to create an interactive page for Amazon Mechanical Turk where crowdworkers could receive information regarding the NGO and how to look for it. Furthermore, we needed this page to be able to obtain information from these crowdworkers and log this data into a separate file. Therefore, we used HTML to create a webpage that would provide the worker with relevant details, such as ngo_name, type_ngo, and valid_until, and can simultaneously take inputs regarding NGO information, if found. To expedite the search process, we added four new columns to the updated dataset: text_ngo_name, text_ngo_name_words, link_ngo_name, link_ngo_name_words. The first two columns include pre-made Google search links (the former with the NGO name, the latter with the NGO name and the additional words “NGO Bangladesh”). The last two columns include hyperlinks to these respective fields. Furthermore, we included a checklist of the 41 different sector types from NGO Darpan to gather information on what industry most of these NGOs are a part of. Once uploading the HTML and CSV files and specifying the dataset that needs to be traversed, Amazon Mechanical Turk will pull each NGO information from the CSV file and report it to each crowdworker. Then, Turk will record the information and links the crowdworkers provide it on a separate file. Ultimately, the information that we would be receiving are as follows.
 
-Logging Details:
+### Logging Details:
 
 - website_type (is the website local, international, social media, etc.)
 - email_entered (email of NGO, if found)
@@ -63,3 +63,5 @@ Logging Details:
 - ngo_field_specific (in case NGO field is not listed above, log predicted field)
 
 With these details, we can obtain contact information of experts within NGOs in Bangladesh on a wide scale efficiently, supporting the poverty-alleviation plans.
+
+> Note: This is a research work summary created for the Bangladesh dataset, but process should be similar for the Pakistan dataset.
