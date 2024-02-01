@@ -250,7 +250,6 @@ bangladesh_df %>%
   labs(title = "Distribution of countries") + 
   theme(axis.text.x = element_text(angle = 50, hjust = 1))
 
-
 #---------------------------------------------------------------------------#
 #--------------------REMOVING NGOs THAT HAVE EXPIRED------------------------#
 #---------------------------------------------------------------------------#
