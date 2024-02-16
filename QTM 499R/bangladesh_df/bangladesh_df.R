@@ -11,8 +11,8 @@ library(ggplot2)
 library(lubridate)
 
 # Directory to QTM 499R Folder in OneDrive
-onedrive         <- "/Users/jspgr33n/Library/CloudStorage/OneDrive-EmoryUniversity/QTM 499R"
-rawdata_onedrive <- paste0(onedrive, "/ngo_raw_lists/new_files")
+onedrive         <- "/Users/jspgr33n/Library/CloudStorage/OneDrive-EmoryUniversity/QTM-Research/QTM 499R"
+rawdata_onedrive <- paste0(onedrive, "/bangladesh_df/new_files")
 
 #---------------------------------------------------------------------------#
 #-------------------------ITERATION & INCREMENTING--------------------------#
