@@ -12,16 +12,16 @@ library(lubridate)
 
 # Directory to QTM 499R Folder in OneDrive
 onedrive         <- "/Users/jspgr33n/Library/CloudStorage/OneDrive-EmoryUniversity/QTM-Research/QTM 499R"
-rawdata_onedrive <- paste0(onedrive, "/bangladesh_df/new_files")
+rawdata_onedrive_bg <- paste0(onedrive, "/bangladesh_df/new_files")
 
 #---------------------------------------------------------------------------#
 #-------------------------ITERATION & INCREMENTING--------------------------#
 #---------------------------------------------------------------------------#
 
 # Loading Bangladesh datasets
-bangladesh_local <- read.csv(paste0(rawdata_onedrive, 
+bangladesh_local <- read.csv(paste0(rawdata_onedrive_bg, 
                                     "/bangladesh_local_ngo_list.csv"))
-bangladesh_international <- read.csv(paste0(rawdata_onedrive, 
+bangladesh_international <- read.csv(paste0(rawdata_onedrive_bg, 
                                             "/bangladesh_foreign_ngo_list.csv"))
 
 # Iterating through each row in Bangladesh local dataset and assigning
@@ -114,7 +114,7 @@ bangladesh_df <- bangladesh_df %>%
          ngo_name = str_squish(ngo_name))
 
 # Writing Bangladesh total dataset into a new csv file
-write.csv(bangladesh_df, paste0(rawdata_onedrive,"/bangladesh_listngos_total.csv"))
+write.csv(bangladesh_df, paste0(rawdata_onedrive_bg,"/bangladesh_listngos_total.csv"))
 
 #---------------------------------------------------------------------------#
 #-----------CHECKING NGO UNIQUE IDS/DUPLICATES & SUMMARY STATS--------------#
@@ -268,7 +268,7 @@ random_50_rows_valid <- bangladesh_df_valid %>%
   select(ngo_name, reg_no, type_ngo, remarks, valid_until)
 
 # Write this into a csv file
-write.csv(random_50_rows_valid, paste0(rawdata_onedrive, "/random_50_rows_valid.csv"))
+write.csv(random_50_rows_valid, paste0(rawdata_onedrive_bg, "/random_50_rows_valid.csv"))
 
 #---------------------------------------------------------------------------#
 #-------------------HYPERLINKING SEARCH LINKS FOR NGOs----------------------#
@@ -294,7 +294,7 @@ class(bangladesh_df_valid_searches$text_ngo_name_words) <- "hyperlink"
 # Export this newly created copy with hyperlinks for Amazon Turk usage
 write.csv(bangladesh_df_valid_searches,
           row.names = FALSE,
-          file = paste0(rawdata_onedrive, "/bangladesh_df_valid_searches.csv"))
+          file = paste0(rawdata_onedrive_bg, "/bangladesh_df_valid_searches.csv"))
 
 #---------------------------------------------------------------------------#
 #-------------------COUNTING NGO FIELDS FROM 50 SAMPLE----------------------#
@@ -302,7 +302,7 @@ write.csv(bangladesh_df_valid_searches,
 
 # 12/12/2023
 
-random_50_rows_valid_info <- bangladesh_local <- read.csv(paste0(rawdata_onedrive, 
+random_50_rows_valid_info <- bangladesh_local <- read.csv(paste0(rawdata_onedrive_bg, 
                                                                  "/random_50_rows_valid_info.csv"))
 
 random_50_rows_valid_info %>%
