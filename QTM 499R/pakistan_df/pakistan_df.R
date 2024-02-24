@@ -37,3 +37,13 @@ website_found_count <- ngobase_validity_websites %>%
 
 # Calculate percentage of websites found given 50 random NGOs
 website_found_count/nrow(ngobase_validity_websites)
+
+#---------------------------------------------------------------------------#
+#-----------------50 RANDOM PDF NGOs OBSERVED ON NGOBASE--------------------#
+#---------------------------------------------------------------------------#
+
+# The pakistan_listngos pdf file has 474 NGOs. Select 50 random samples and
+# determine whether or not if they can be found on NGOBase
+pakistan_listngos <- sample(1:474, 50, replace = FALSE)
+pakistan_listngos_ngobase <- data.frame(pakistan_listngos)
+write.csv(pakistan_listngos_ngobase, paste0(rawdata_onedrive_pk,"/pakistan_listngos_ngobase.csv"))
