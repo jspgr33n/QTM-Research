@@ -42,11 +42,12 @@ library(readxl)
 
 # Set directory (automatically detecting computer)
 # The first time you will need to enter this manually
+# -- Changed from Dr. Sanchez-Becerra's directory to James' directory
 
-if(Sys.info()["user"] == "asanc31") {
-  dirhat     <- paste0("/Users/asanc31/Library/CloudStorage/",
-                       "OneDrive-EmoryUniversity/QTM 499R/pakistan_df/")
-} else if(Sys.getenv("USERNAME")=="asanc"){
+if(Sys.info()["user"] == "jspgr33n") {
+  dirhat     <- paste0("/Users/jspgr33n/Library/CloudStorage/",
+                       "OneDrive-EmoryUniversity/QTM-Research/QTM 499R/pakistan_df/")
+} else if(Sys.getenv("USERNAME")=="jspgr33n"){
   dirhat <- ""
 }
 
@@ -88,7 +89,7 @@ fn_clean_image <- function(image_filename,rotate_param){
 #' This function crops an image
 #' We use this to define the area of the image that contains the table (this
 #' improves the quality of the OCR dramatically).
-#' This function can also be uses to define specific boxex/celss within the
+#' This function can also be uses to define specific boxes/cells within the
 #' table.
 #' @param image_object An image object, imported previously.
 #' @param box_param    A list of 4 parameters specifying the coordinates
@@ -134,14 +135,14 @@ fn_extract_column <- function(image_object,box_param){
 #------------------------------------------------------------------------------#
 
 # Define which page to crop
-set_page <- 1
+set_page <- 9
 
 # Import configuration data for each page
 config_data  <- read_excel(paste0(dirhat,"param/param_ocr.xlsx")) %>%
                 as.data.frame()
   
 # Initial Crop
-rotate_param       <- config_data[set_page,"rotate_param"]  # 0.75
+rotate_param       <- config_data[set_page,"rotate_param"]  # 0.75, stats for p1
 image_param        <- list()
 image_param$width  <- config_data[set_page,"width"]         # 1750 
 image_param$height <- config_data[set_page,"height"]        # 1950
@@ -155,7 +156,7 @@ clean_image        <- fn_crop_image(image_object = clean_image,
 image_param
 
 ### JAMES INSTRUCTIONS:
-#  The weak the values in the excel file until you make sure that
+#  Tweak the values in the excel file until you make sure that
 # we can properly crop and rotate the image in each page
 
 # IMPORTANT: Double check in the PDF to make sure that the table 
@@ -187,7 +188,7 @@ data <- tibble(box_value = rep(NA,total_rows),
 
 # Step 3: Extract organization numbers
 
-# This is done to propertly extract the names of organizations
+# This is done to properly extract the names of organizations
 # that are written across more than one line.
 for(i in 1:total_rows){
   print(i)
