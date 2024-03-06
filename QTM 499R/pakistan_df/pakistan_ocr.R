@@ -49,6 +49,9 @@ if(Sys.info()["user"] == "jspgr33n") {
                        "OneDrive-EmoryUniversity/QTM-Research/QTM 499R/pakistan_df/")
 } else if(Sys.getenv("USERNAME")=="jspgr33n"){
   dirhat <- ""
+} else if(Sys.info()["user"] == "asanc31"){
+  dirhat     <- paste0("/Users/asanc31/Library/CloudStorage/",
+                       "OneDrive-EmoryUniversity/QTM 499R/pakistan_df/")
 }
 
 # Set image directory
