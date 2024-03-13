@@ -140,7 +140,8 @@ fn_extract_column <- function(image_object,box_param){
 
 all_data <- tibble()
 
-for (set_page in 1:10) {
+# for (set_page in 1:10) {
+  set_page <- 3
 
   # Import configuration data for each page
   config_data  <- read_excel(paste0(dirhat,"param/param_ocr.xlsx")) %>%
@@ -270,8 +271,8 @@ for (set_page in 1:10) {
     print("Number of rows of MOU validity does not match")
   }
   
-  all_data <- bind_rows(all_data, data)
-}
+  # all_data <- bind_rows(all_data, data)
+# }
 
-all_data
+# all_data
 
