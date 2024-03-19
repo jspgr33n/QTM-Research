@@ -64,4 +64,4 @@ After validation of the data and seeing that it indeed results in a high success
 
 With these details, we can obtain contact information of experts within NGOs in Bangladesh on a wide scale efficiently, supporting the poverty-alleviation plans.
 
-> Note: This is a research work summary created for the Bangladesh dataset, but process should be similar for the Pakistan dataset.
+> Note: This is a research work summary created for the Bangladesh dataset, but process should be similar for the Pakistan and India dataset.
