@@ -273,5 +273,5 @@ for (set_page in 1:10) {
   all_data <- bind_rows(all_data, data)
 }
 
-write.csv(all_data, paste0(dirhat, "/pakistan_data.csv"))
+write.csv(all_data, paste0(dirhat, "/pakistan_data_dirty.csv"))
 
