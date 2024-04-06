@@ -1,0 +1,300 @@
+
+#-------------------------------------------------------------------------------------------------------------------------
+
+#--- This function extracts the page url for a specific sector + page number
+def get_page_url(sector_url, page_num):
+    page_url = sector_url.split('?',1)[0][:-1]+f'{page_num}?per_page=100'
+    return page_url
+
+#-------------------------------------------------------------------------------------------------------------------------
+
+#--- This function creates a sector-specific URL
+def get_sector_urls(base_url): 
+    driver.get(base_url)
+    sector_urls = [url.get_attribute('href') for url in driver.find_elements(By.CLASS_NAME, 'bluelink11px')]
+    sector_urls = [url+'?per_page=100' for url in sector_urls]
+    return sector_urls
+
+
+#-------------------------------------------------------------------------------------------------------------------------
+
+#--- This function captures the number of pages per sector
+def get_num_of_pages_for_sector(sector_num,driver): 
+    sector_url = sector_urls[sector_num]
+    driver.get(sector_url)
+    list_buttonlast = driver.find_elements(By.PARTIAL_LINK_TEXT, 'Last')
+    # If there are more than 10 pages, extract the link from the "last page".
+    # Otherwise count how many page buttons there are (excluding the "previous" and "next" buttons)
+    if len(list_buttonlast) > 0:
+        driver.find_elements(By.PARTIAL_LINK_TEXT, 'Last')[0].click()
+        last_page_url = driver.current_url
+        total_pages = int(last_page_url.split('?')[0].rsplit('/',1)[1])
+    else:
+        list_page_nums = driver.find_elements(By.XPATH, "//ul[@class='pagination']//li") # updated this code as previous version did not work
+        if len(list_page_nums) == 0:
+            total_pages = 1
+        else:
+            total_pages = len(list_page_nums)-2
+    return total_pages
+
+#-------------------------------------------------------------------------------------------------------------------------
+
+#--- This function takes a list of NGO's per page, clicls through them sequentially,
+#--- and extracts information from pop-up.
+def scrape_a_single_page(sector_num, page_num): 
+    
+    # The following code selects a web_driver from the dictionary.
+    # Both "drivers_dict" and "max_workers are defined in the environment."
+    #driver = drivers_dict[page_num % max_workers_num]
+    
+    try:
+        thread_name= threading.current_thread().name
+        #print(threading.current_thread().name)
+        #sometime we are going to have different thread name in each iteration so a little regex might help
+        # This code avoids leaving additional threads running whenever "ThreadPoolExecutor" is run
+        thread_name = re.sub("ThreadPoolExecutor-(\d*)_(\d*)", r"ThreadPoolExecutor-0_\2", thread_name)
+        #print(f"re.sub -> {thread_name}")
+        driver = drivers_dict[thread_name]
+    except KeyError:
+        drivers_dict[threading.current_thread().name] = webdriver.Chrome(options=options)
+        driver = drivers_dict[threading.current_thread().name]    
+    
+    sector_url = sector_urls[sector_num]
+    page_url   = get_page_url(sector_url, page_num)
+    driver.get(page_url)
+    time.sleep(2)
+    ngos_on_page = driver.find_elements_by_xpath("//a[contains(@onclick,'show_ngo_info')]")
+    page_df = pd.DataFrame()
+    for i in range(0, len(ngos_on_page)): 
+    #for i in range(0, 3):
+        print(f'scraping NGO number {i+1}')
+        ngo = ngos_on_page[i]
+        time.sleep(2)
+        ngo.click()
+#         print('Opened NGO info box')
+#         print('Extracting Details')
+        time.sleep(2)
+        name = driver.find_element_by_id('ngo_name_title').get_attribute('innerHTML')
+        uid = driver.find_element_by_id('UniqueID').get_attribute('innerHTML')
+        reg_with = driver.find_element_by_id('reg_with').get_attribute('innerHTML')
+        ngo_type = driver.find_element_by_id('ngo_type').get_attribute('innerHTML')
+        ngo_regno = driver.find_element_by_id('ngo_regno').get_attribute('innerHTML')
+        rc_upload = driver.find_element_by_id('rc_upload').get_attribute('innerHTML')
+        pc_upload = driver.find_element_by_id('pc_upload').get_attribute('innerHTML')
+        act_name = driver.find_element_by_id('ngo_act_name').get_attribute('innerHTML')
+        city_reg = driver.find_element_by_id('ngo_city_p').get_attribute('innerHTML')
+        state_reg = driver.find_element_by_id('ngo_state_p').get_attribute('innerHTML')
+        reg_date = driver.find_element_by_id('ngo_reg_date').get_attribute('innerHTML')
+        key_issues = driver.find_element_by_id('key_issues').get_attribute('innerHTML')
+        operational_states = driver.find_element_by_id('operational_states').get_attribute('innerHTML')
+        operational_districts = driver.find_element_by_id('operational_district').get_attribute('innerHTML')
+        fcra_details = driver.find_element_by_id('FCRA_details').get_attribute('innerHTML')
+        fcra_regno = driver.find_element_by_id('FCRA_reg_no').get_attribute('innerHTML')
+        details_achievement = driver.find_element_by_id('activities_achieve').get_attribute('innerHTML')
+        contact_address = driver.find_element_by_id('address').get_attribute('innerHTML')
+        contact_city = driver.find_element_by_id('city').get_attribute('innerHTML')
+        contact_state = driver.find_element_by_id('state_p_ngo').get_attribute('innerHTML')
+        contact_telephone = driver.find_element_by_id('phone_n').get_attribute('innerHTML')
+        contact_mobile = driver.find_element_by_id('mobile_n').get_attribute('innerHTML')
+        contact_website = driver.find_element_by_id('ngo_web_url').get_attribute('innerText')
+        contact_email = driver.find_element_by_id('email_n').get_attribute('innerHTML')
+#         print('Extracting details from members table...')
+        members_table = driver.find_element_by_id('member_table')
+        member_names =  [i.get_attribute('innerHTML') for i in members_table.find_elements_by_xpath('.//tr//td')[::4]]
+        member_designations = [i.get_attribute('innerHTML') for i in members_table.find_elements_by_xpath('.//tr//td')[1::4]]
+        member_pan = [i.get_attribute('innerHTML') for i in members_table.find_elements_by_xpath('.//tr//td')[2::4]]
+        member_aadhar = [i.get_attribute('innerHTML') for i in members_table.find_elements_by_xpath('.//tr//td')[3::4]]
+        member_name_designation_dict = dict(zip(member_names, member_designations))
+        member_name_pan_dict = dict(zip(member_names, member_pan))
+        member_name_aadhar_dict = dict(zip(member_names, member_aadhar))
+#         print('Extracting details from Source of Funds table...')
+        sof_table = driver.find_element_by_id('source_table')
+        dept_name = [i.get_attribute('innerHTML') for i in sof_table.find_elements_by_xpath('.//tr//td')[::5]]
+        source = [i.get_attribute('innerHTML') for i in sof_table.find_elements_by_xpath('.//tr//td')[1::5]]
+        financial_year = [i.get_attribute('innerHTML') for i in sof_table.find_elements_by_xpath('.//tr//td')[2::5]]
+        amount_sanctioned =[i.get_attribute('innerHTML') for i in sof_table.find_elements_by_xpath('.//tr//td')[3::5]]
+        purpose = [i.get_attribute('innerHTML') for i in sof_table.find_elements_by_xpath('.//tr//td')[4::5]]
+        year_amount_dict = dict(zip(financial_year, amount_sanctioned))
+        year_dept_dict = dict(zip(financial_year, dept_name))
+        year_source_dict = dict(zip(financial_year, source))
+        year_purpose_dict = dict(zip(financial_year, purpose))
+#         print('Storing extracted info into a dataframe')
+        df = pd.DataFrame()
+        df['ngo_name'] = [name]
+        df['unique_id'] = uid
+        df['registered_with'] = reg_with
+        df['type_of_ngo'] = ngo_type
+        df['registration_number'] = ngo_regno
+        df['copy_of_registration_certificate'] = rc_upload
+        df['copy_of_pan_card'] = pc_upload
+        df['act_name'] = act_name
+        df['city_of_registration'] = city_reg
+        df['state_of_registration'] = state_reg
+        df['registration_date'] = reg_date
+        df['key_issues'] = key_issues
+        df['operational_areas_states'] = operational_states
+        df['operational_areas_districts'] = operational_districts
+        df['FCRA_details'] = fcra_details
+        df['FCRA_registration_num'] = fcra_regno
+        df['details_of_achievement'] = details_achievement
+        df['contact_details_address'] = contact_address
+        df['contact_details_city'] = contact_city
+        df['contact_details_state'] = contact_state
+        df['contact_details_telephone'] = contact_telephone
+        df['contact_details_website'] = contact_website
+        df['contact_details_email'] = contact_email
+        df['members_names_designations'] = [member_name_designation_dict]
+        df['members_names_pan_availability'] = [member_name_pan_dict]
+        df['members_names_aadhar_availability'] = [member_name_aadhar_dict]
+        df['source_of_funds_amount_sanctioned'] = [year_amount_dict]
+        df['source_of_funds_department_name'] = [year_dept_dict]
+        df['source_of_funds_source'] = [year_source_dict]
+        df['source_of_funds_purpose'] = [year_purpose_dict]
+        df['sector_number'] = sector_num
+        df['ngo_num'] = i
+        df['page_num'] = page_num
+        df['page_num_total'] = len(ngos_on_page)
+#         print('Appending to dataframe for all NGOs...')
+        page_df = pd.concat([page_df,df]) # Alejandro-note: Use pandas.concat instead. Old method deprecated. page_df.append(df) 
+        page_df.to_csv(f'{store_directory}/sectorno_{sector_num}_pageno_{page_num}_ngo_scraping.csv', index=False)
+#         print('Closing pop-up window')
+        close_button = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#ngo_info_modal > div.modal-dialog.modal-lg > div > div.modal-header > button')))
+        time.sleep(2)
+        close_button.click()
+    # drivers_dict[threading.current_thread().name].quit()
+    return page_df
+
+#-------------------------------------------------------------------------------------------------------------------------
+
+def scrape_a_sector(sector_num): 
+    sector_url = sector_urls[sector_num]
+    total_pages = get_num_of_pages_for_sector(sector_num)
+    sector_df = pd.DataFrame()
+    unsuccessful_pages= pd.DataFrame()
+    for page in tqdm(range(1, total_pages+1)):
+        print(f'Scraping page number {page}')
+        page_url = get_page_url(sector_url, page)
+        print(f'Scraping {page_url}')
+        try: 
+            page_df = scrape_a_single_page(sector_num, page_num= page)
+            sector_df = pd.concat([sector_df,page_df]) # Alejandro-note: Use pandas.concat instead. Old method deprecated. sector_df.append(page_df)
+            print(f'Page number {page} of {total_pages} finished')
+        except Exception as e: 
+            print(f'Exception {e} occurred for sector number {0} and page number {page}' )
+            temp_df = pd.DataFrame()
+            temp_df['sector_num'] = [sector_num]
+            temp_df['page_url'] =page_url
+            unsuccessful_pages = unsuccessful_pages.append(temp_df)
+            unsuccessful_pages.to_csv(f'{store_directory}/unsuccessfully_scraped_pages.csv', index=False)
+            continue
+    return sector_df
+
+#-------------------------------------------------------------------------------------------------------------------------
+
+# Scrape the list of ngos in each page
+def scrape_list_singleplage(sector_num,page_num,driver): 
+    
+    sector_url = sector_urls[sector_num]
+    page_url   = get_page_url(sector_url, page_num)
+    driver.get(page_url)
+    time.sleep(2)
+    ngos_on_page = driver.find_elements(By.XPATH, "//a[contains(@onclick,'show_ngo_info')]") # CHANGING THIS
+    page_df = pd.DataFrame()
+
+    # This command extracts the table of ngos + some extraneous information
+    # The second row subsets the first 500 elements (100 organizations x 5 attributes)
+    ngolist_table = driver.find_elements(By.XPATH, ".//table[contains(@class,'table table-striped table-bordered table-hover Tax')]")
+    raw_table = []
+    for table in ngolist_table:
+        tds = table.find_elements(By.XPATH, './/tbody//tr//td')
+        raw_table.extend([td.get_attribute('innerHTML') for td in tds])
+
+    # Limit to the first 500 elements if necessary
+    raw_table = raw_table[:500]
+    ngo_numinpage    = raw_table[0::5]
+    ngo_hyperlink    = raw_table[1::5]
+    ngo_registration = raw_table[2::5]
+    ngo_address      = raw_table[3::5]
+    ngo_sectors      = raw_table[4::5]
+    ngo_names = [i.split("<")[1].split(">")[1] for i in ngo_hyperlink]
+
+    page_df['sector_num']    = [sector_num for i in range(0,len(ngo_numinpage))]
+    page_df['page_num']      = [page_num for i in range(0,len(ngo_numinpage))]
+    page_df['index_in_page'] = [i for i in range(0,len(ngo_numinpage))]
+    page_df['ngo_name']     = ngo_names
+    page_df['ngo_hyperlink'] = ngo_hyperlink
+    page_df['ngo_registration'] = ngo_registration
+    page_df['ngo_address']  = ngo_address
+    page_df['ngo_sectors']  = ngo_sectors
+
+    # page_df.to_csv(f'{store_directory}/list_sectorno_{sector_num}_page{page_num}_ngo_scraping.csv', index=False)    
+    
+    return(page_df)
+
+
+#-------------------------------------------------------------------------------------------------------------------------
+
+
+def scrape_list_ngo_sector(sector_num): 
+    print(f'Scraping sector number {sector_num}')  
+    sector_url = sector_urls[sector_num]
+    # print(f'Scraping sector number {sector_url}')
+    #total_pages = total_pages_list[sector_num]
+    #print(f'Scraping sector number {total_pages}')    
+    #print(f'Initiating Web Driver') 
+    try:
+        thread_name= threading.current_thread().name
+        #print(threading.current_thread().name)
+        #sometime we are going to have different thread name in each iteration so a little regex might help
+        # This code avoids leaving additional threads running whenever "ThreadPoolExecutor" is run
+        thread_name = re.sub("ThreadPoolExecutor-(\d*)_(\d*)", r"ThreadPoolExecutor-0_\2", thread_name)
+        #print(f"re.sub -> {thread_name}")
+        driver = drivers_dict[thread_name]
+        print(f"{thread_name}")
+    except KeyError:
+        drivers_dict[threading.current_thread().name] = webdriver.Chrome(options=options)
+        driver = drivers_dict[threading.current_thread().name] 
+    
+    print(f'Obtaining total number of pages')    
+    total_pages = get_num_of_pages_for_sector(sector_num,driver)
+    
+    time.sleep(4)
+    print(f'Initiating Scraping of NGO lists')
+    
+    sector_df = pd.DataFrame()
+    #unsuccessful_pages= pd.DataFrame()
+    for page in tqdm(range(1, total_pages+1)):
+        print(f'Scraping Sector {sector_num}, page number {page}')
+        page_url = get_page_url(sector_url, page)
+        #print(f'Scraping {page_url}')
+        page_df = scrape_list_singleplage(sector_num, page_num= page,driver=driver)
+        sector_df = pd.concat([sector_df,page_df])
+
+    sector_df.to_csv(f'{store_directory}/list_sectorno_{sector_num}_ngo_scraping.csv', index=False)    
+        
+    return sector_df
+
+#-------------------------------------------------------------------------------------------------------------------------
+
+
+def scrape_multiple_pages(sector_num, start_page_num, end_page_num): 
+    page_list = list(range(start_page_num, end_page_num+1))
+    main_df = pd.DataFrame()
+    unsuccessful_pages = pd.DataFrame()
+    sector_url = sector_urls[sector_num]
+    # The "tqdm" command helps us keep track of progress.
+    for page in tqdm(page_list): 
+        print(f'Scraping page number {page}')
+        page_url = get_page_url(sector_url, page)
+        print(f'Scraping {page_url}')
+        try: 
+            page_df = scrape_a_single_page(sector_num, page_num= page)
+            main_df = pd.concat([main_df,page_df]) # Alejandro-note: Use pandas.concat instead. Old method deprecated. main_df.append(page_df)
+        except Exception as e: 
+            print(f'Exception {e} occurred for sector number {0} and page number {page}' )
+            temp_df = pd.DataFrame()
+            temp_df['sector_num'] = [sector_num]
+            temp_df['page_url'] =page_url
+            unsuccessful_pages = pd.concat([unsuccessful_pages,temp_df]) # Alejandro-note: Use pandas.concat instead. Old method deprecated. unsuccessful_pages.append(temp_df) 
+            unsuccessful_pages.to_csv('./unsuccessfully_scraped_pages_sector{sector_num}_page{page}.csv', index=False)
+            continue
