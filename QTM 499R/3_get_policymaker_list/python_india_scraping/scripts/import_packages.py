@@ -1,8 +1,10 @@
 
 #-------------------------------------------------------------------------------------------------------------------------
 
-import pandas as pd #To store scraped data
+import pandas as pd # To store scraped data
 import re # Use regular expressions
+import os # To get user/storage paths
+import getpass
 
 
 #--------DISPLAY SETTINGS FOR THE NOTEBOOK--------
@@ -59,4 +61,3 @@ from itertools import repeat
 from concurrent import futures
 from multiprocessing import Pool  # This is a CPU-based Pool
 from multiprocessing import cpu_count
-

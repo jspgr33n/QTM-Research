@@ -59,107 +59,213 @@ def scrape_a_single_page(sector_num, page_num):
         drivers_dict[threading.current_thread().name] = webdriver.Chrome(options=options)
         driver = drivers_dict[threading.current_thread().name]    
     
+#     sector_url = sector_urls[sector_num]
+#     page_url   = get_page_url(sector_url, page_num)
+#     driver.get(page_url)
+#     time.sleep(2)
+#     ngos_on_page = driver.find_elements_by_xpath("//a[contains(@onclick,'show_ngo_info')]")
+#     page_df = pd.DataFrame()
+#     for i in range(0, len(ngos_on_page)): 
+#         print(f'scraping NGO number {i+1}')
+#         ngo = ngos_on_page[i]
+#         time.sleep(2)
+#         ngo.click()
+# #         print('Opened NGO info box')
+# #         print('Extracting Details')
+#         time.sleep(2)
+#         name = driver.find_element_by_id('ngo_name_title').get_attribute('innerHTML')
+#         uid = driver.find_element_by_id('UniqueID').get_attribute('innerHTML')
+#         reg_with = driver.find_element_by_id('reg_with').get_attribute('innerHTML')
+#         ngo_type = driver.find_element_by_id('ngo_type').get_attribute('innerHTML')
+#         ngo_regno = driver.find_element_by_id('ngo_regno').get_attribute('innerHTML')
+#         rc_upload = driver.find_element_by_id('rc_upload').get_attribute('innerHTML')
+#         pc_upload = driver.find_element_by_id('pc_upload').get_attribute('innerHTML')
+#         act_name = driver.find_element_by_id('ngo_act_name').get_attribute('innerHTML')
+#         city_reg = driver.find_element_by_id('ngo_city_p').get_attribute('innerHTML')
+#         state_reg = driver.find_element_by_id('ngo_state_p').get_attribute('innerHTML')
+#         reg_date = driver.find_element_by_id('ngo_reg_date').get_attribute('innerHTML')
+#         key_issues = driver.find_element_by_id('key_issues').get_attribute('innerHTML')
+#         operational_states = driver.find_element_by_id('operational_states').get_attribute('innerHTML')
+#         operational_districts = driver.find_element_by_id('operational_district').get_attribute('innerHTML')
+#         fcra_details = driver.find_element_by_id('FCRA_details').get_attribute('innerHTML')
+#         fcra_regno = driver.find_element_by_id('FCRA_reg_no').get_attribute('innerHTML')
+#         details_achievement = driver.find_element_by_id('activities_achieve').get_attribute('innerHTML')
+#         contact_address = driver.find_element_by_id('address').get_attribute('innerHTML')
+#         contact_city = driver.find_element_by_id('city').get_attribute('innerHTML')
+#         contact_state = driver.find_element_by_id('state_p_ngo').get_attribute('innerHTML')
+#         contact_telephone = driver.find_element_by_id('phone_n').get_attribute('innerHTML')
+#         contact_mobile = driver.find_element_by_id('mobile_n').get_attribute('innerHTML')
+#         contact_website = driver.find_element_by_id('ngo_web_url').get_attribute('innerText')
+#         contact_email = driver.find_element_by_id('email_n').get_attribute('innerHTML')
+# #         print('Extracting details from members table...')
+#         members_table = driver.find_element_by_id('member_table')
+#         member_names =  [i.get_attribute('innerHTML') for i in members_table.find_elements_by_xpath('.//tr//td')[::4]]
+#         member_designations = [i.get_attribute('innerHTML') for i in members_table.find_elements_by_xpath('.//tr//td')[1::4]]
+#         member_pan = [i.get_attribute('innerHTML') for i in members_table.find_elements_by_xpath('.//tr//td')[2::4]]
+#         member_aadhar = [i.get_attribute('innerHTML') for i in members_table.find_elements_by_xpath('.//tr//td')[3::4]]
+#         member_name_designation_dict = dict(zip(member_names, member_designations))
+#         member_name_pan_dict = dict(zip(member_names, member_pan))
+#         member_name_aadhar_dict = dict(zip(member_names, member_aadhar))
+# #         print('Extracting details from Source of Funds table...')
+#         sof_table = driver.find_element_by_id('source_table')
+#         dept_name = [i.get_attribute('innerHTML') for i in sof_table.find_elements_by_xpath('.//tr//td')[::5]]
+#         source = [i.get_attribute('innerHTML') for i in sof_table.find_elements_by_xpath('.//tr//td')[1::5]]
+#         financial_year = [i.get_attribute('innerHTML') for i in sof_table.find_elements_by_xpath('.//tr//td')[2::5]]
+#         amount_sanctioned =[i.get_attribute('innerHTML') for i in sof_table.find_elements_by_xpath('.//tr//td')[3::5]]
+#         purpose = [i.get_attribute('innerHTML') for i in sof_table.find_elements_by_xpath('.//tr//td')[4::5]]
+#         year_amount_dict = dict(zip(financial_year, amount_sanctioned))
+#         year_dept_dict = dict(zip(financial_year, dept_name))
+#         year_source_dict = dict(zip(financial_year, source))
+#         year_purpose_dict = dict(zip(financial_year, purpose))
+# #         print('Storing extracted info into a dataframe')
+#         df = pd.DataFrame()
+#         df['ngo_name'] = [name]
+#         df['unique_id'] = uid
+#         df['registered_with'] = reg_with
+#         df['type_of_ngo'] = ngo_type
+#         df['registration_number'] = ngo_regno
+#         df['copy_of_registration_certificate'] = rc_upload
+#         df['copy_of_pan_card'] = pc_upload
+#         df['act_name'] = act_name
+#         df['city_of_registration'] = city_reg
+#         df['state_of_registration'] = state_reg
+#         df['registration_date'] = reg_date
+#         df['key_issues'] = key_issues
+#         df['operational_areas_states'] = operational_states
+#         df['operational_areas_districts'] = operational_districts
+#         df['FCRA_details'] = fcra_details
+#         df['FCRA_registration_num'] = fcra_regno
+#         df['details_of_achievement'] = details_achievement
+#         df['contact_details_address'] = contact_address
+#         df['contact_details_city'] = contact_city
+#         df['contact_details_state'] = contact_state
+#         df['contact_details_telephone'] = contact_telephone
+#         df['contact_details_website'] = contact_website
+#         df['contact_details_email'] = contact_email
+#         df['members_names_designations'] = [member_name_designation_dict]
+#         df['members_names_pan_availability'] = [member_name_pan_dict]
+#         df['members_names_aadhar_availability'] = [member_name_aadhar_dict]
+#         df['source_of_funds_amount_sanctioned'] = [year_amount_dict]
+#         df['source_of_funds_department_name'] = [year_dept_dict]
+#         df['source_of_funds_source'] = [year_source_dict]
+#         df['source_of_funds_purpose'] = [year_purpose_dict]
+#         df['sector_number'] = sector_num
+#         df['ngo_num'] = i
+#         df['page_num'] = page_num
+#         df['page_num_total'] = len(ngos_on_page)
+# #         print('Appending to dataframe for all NGOs...')
+#         page_df = pd.concat([page_df,df]) # Alejandro-note: Use pandas.concat instead. Old method deprecated. page_df.append(df) 
+#         page_df.to_csv(f'{store_directory}/sectorno_{sector_num}_pageno_{page_num}_ngo_scraping.csv', index=False)
+# #         print('Closing pop-up window')
+#         close_button = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#ngo_info_modal > div.modal-dialog.modal-lg > div > div.modal-header > button')))
+#         time.sleep(2)
+#         close_button.click()
+
+
     sector_url = sector_urls[sector_num]
-    page_url   = get_page_url(sector_url, page_num)
+    page_url = get_page_url(sector_url, page_num)
     driver.get(page_url)
-    time.sleep(2)
-    ngos_on_page = driver.find_elements_by_xpath("//a[contains(@onclick,'show_ngo_info')]")
+    time.sleep(3)
+    ngos_on_page = driver.find_elements(By.XPATH, "//a[contains(@onclick,'show_ngo_info')]")
     page_df = pd.DataFrame()
-    for i in range(0, len(ngos_on_page)): 
-    #for i in range(0, 3):
+
+    for i in range(0, len(ngos_on_page)):
         print(f'scraping NGO number {i+1}')
         ngo = ngos_on_page[i]
-        time.sleep(2)
+        time.sleep(3)
         ngo.click()
-#         print('Opened NGO info box')
-#         print('Extracting Details')
-        time.sleep(2)
-        name = driver.find_element_by_id('ngo_name_title').get_attribute('innerHTML')
-        uid = driver.find_element_by_id('UniqueID').get_attribute('innerHTML')
-        reg_with = driver.find_element_by_id('reg_with').get_attribute('innerHTML')
-        ngo_type = driver.find_element_by_id('ngo_type').get_attribute('innerHTML')
-        ngo_regno = driver.find_element_by_id('ngo_regno').get_attribute('innerHTML')
-        rc_upload = driver.find_element_by_id('rc_upload').get_attribute('innerHTML')
-        pc_upload = driver.find_element_by_id('pc_upload').get_attribute('innerHTML')
-        act_name = driver.find_element_by_id('ngo_act_name').get_attribute('innerHTML')
-        city_reg = driver.find_element_by_id('ngo_city_p').get_attribute('innerHTML')
-        state_reg = driver.find_element_by_id('ngo_state_p').get_attribute('innerHTML')
-        reg_date = driver.find_element_by_id('ngo_reg_date').get_attribute('innerHTML')
-        key_issues = driver.find_element_by_id('key_issues').get_attribute('innerHTML')
-        operational_states = driver.find_element_by_id('operational_states').get_attribute('innerHTML')
-        operational_districts = driver.find_element_by_id('operational_district').get_attribute('innerHTML')
-        fcra_details = driver.find_element_by_id('FCRA_details').get_attribute('innerHTML')
-        fcra_regno = driver.find_element_by_id('FCRA_reg_no').get_attribute('innerHTML')
-        details_achievement = driver.find_element_by_id('activities_achieve').get_attribute('innerHTML')
-        contact_address = driver.find_element_by_id('address').get_attribute('innerHTML')
-        contact_city = driver.find_element_by_id('city').get_attribute('innerHTML')
-        contact_state = driver.find_element_by_id('state_p_ngo').get_attribute('innerHTML')
-        contact_telephone = driver.find_element_by_id('phone_n').get_attribute('innerHTML')
-        contact_mobile = driver.find_element_by_id('mobile_n').get_attribute('innerHTML')
-        contact_website = driver.find_element_by_id('ngo_web_url').get_attribute('innerText')
-        contact_email = driver.find_element_by_id('email_n').get_attribute('innerHTML')
-#         print('Extracting details from members table...')
-        members_table = driver.find_element_by_id('member_table')
-        member_names =  [i.get_attribute('innerHTML') for i in members_table.find_elements_by_xpath('.//tr//td')[::4]]
-        member_designations = [i.get_attribute('innerHTML') for i in members_table.find_elements_by_xpath('.//tr//td')[1::4]]
-        member_pan = [i.get_attribute('innerHTML') for i in members_table.find_elements_by_xpath('.//tr//td')[2::4]]
-        member_aadhar = [i.get_attribute('innerHTML') for i in members_table.find_elements_by_xpath('.//tr//td')[3::4]]
+        time.sleep(3)
+
+        name = driver.find_element(By.ID, 'ngo_name_title').get_attribute('innerHTML')
+        uid = driver.find_element(By.ID, 'UniqueID').get_attribute('innerHTML')
+        reg_with = driver.find_element(By.ID, 'reg_with').get_attribute('innerHTML')
+        ngo_type = driver.find_element(By.ID, 'ngo_type').get_attribute('innerHTML')
+        ngo_regno = driver.find_element(By.ID, 'ngo_regno').get_attribute('innerHTML')
+        rc_upload = driver.find_element(By.ID, 'rc_upload').get_attribute('innerHTML')
+        pc_upload = driver.find_element(By.ID, 'pc_upload').get_attribute('innerHTML')
+        act_name = driver.find_element(By.ID, 'ngo_act_name').get_attribute('innerHTML')
+        city_reg = driver.find_element(By.ID, 'ngo_city_p').get_attribute('innerHTML')
+        state_reg = driver.find_element(By.ID, 'ngo_state_p').get_attribute('innerHTML')
+        reg_date = driver.find_element(By.ID, 'ngo_reg_date').get_attribute('innerHTML')
+        key_issues = driver.find_element(By.ID, 'key_issues').get_attribute('innerHTML')
+        operational_states = driver.find_element(By.ID, 'operational_states').get_attribute('innerHTML')
+        operational_districts = driver.find_element(By.ID, 'operational_district').get_attribute('innerHTML')
+        fcra_details = driver.find_element(By.ID, 'FCRA_details').get_attribute('innerHTML')
+        fcra_regno = driver.find_element(By.ID, 'FCRA_reg_no').get_attribute('innerHTML')
+        details_achievement = driver.find_element(By.ID, 'activities_achieve').get_attribute('innerHTML')
+        contact_address = driver.find_element(By.ID, 'address').get_attribute('innerHTML')
+        contact_city = driver.find_element(By.ID, 'city').get_attribute('innerHTML')
+        contact_state = driver.find_element(By.ID, 'state_p_ngo').get_attribute('innerHTML')
+        contact_telephone = driver.find_element(By.ID, 'phone_n').get_attribute('innerHTML')
+        contact_mobile = driver.find_element(By.ID, 'mobile_n').get_attribute('innerHTML')
+        contact_website = driver.find_element(By.ID, 'ngo_web_url').get_attribute('innerText')
+        contact_email = driver.find_element(By.ID, 'email_n').get_attribute('innerHTML')
+
+        members_table = driver.find_element(By.ID, 'member_table')
+        member_names = [i.get_attribute('innerHTML') for i in members_table.find_elements(By.XPATH, './/tr//td')[::4]]
+        member_designations = [i.get_attribute('innerHTML') for i in members_table.find_elements(By.XPATH, './/tr//td')[1::4]]
+        member_pan = [i.get_attribute('innerHTML') for i in members_table.find_elements(By.XPATH, './/tr//td')[2::4]]
+        member_aadhar = [i.get_attribute('innerHTML') for i in members_table.find_elements(By.XPATH, './/tr//td')[3::4]]
+
         member_name_designation_dict = dict(zip(member_names, member_designations))
         member_name_pan_dict = dict(zip(member_names, member_pan))
         member_name_aadhar_dict = dict(zip(member_names, member_aadhar))
-#         print('Extracting details from Source of Funds table...')
-        sof_table = driver.find_element_by_id('source_table')
-        dept_name = [i.get_attribute('innerHTML') for i in sof_table.find_elements_by_xpath('.//tr//td')[::5]]
-        source = [i.get_attribute('innerHTML') for i in sof_table.find_elements_by_xpath('.//tr//td')[1::5]]
-        financial_year = [i.get_attribute('innerHTML') for i in sof_table.find_elements_by_xpath('.//tr//td')[2::5]]
-        amount_sanctioned =[i.get_attribute('innerHTML') for i in sof_table.find_elements_by_xpath('.//tr//td')[3::5]]
-        purpose = [i.get_attribute('innerHTML') for i in sof_table.find_elements_by_xpath('.//tr//td')[4::5]]
+
+        sof_table = driver.find_element(By.ID, 'source_table')
+        dept_name = [i.get_attribute('innerHTML') for i in sof_table.find_elements(By.XPATH, './/tr//td')[::5]]
+        source = [i.get_attribute('innerHTML') for i in sof_table.find_elements(By.XPATH, './/tr//td')[1::5]]
+        financial_year = [i.get_attribute('innerHTML') for i in sof_table.find_elements(By.XPATH, './/tr//td')[2::5]]
+        amount_sanctioned = [i.get_attribute('innerHTML') for i in sof_table.find_elements(By.XPATH, './/tr//td')[3::5]]
+        purpose = [i.get_attribute('innerHTML') for i in sof_table.find_elements(By.XPATH, './/tr//td')[4::5]]
+
         year_amount_dict = dict(zip(financial_year, amount_sanctioned))
         year_dept_dict = dict(zip(financial_year, dept_name))
         year_source_dict = dict(zip(financial_year, source))
         year_purpose_dict = dict(zip(financial_year, purpose))
-#         print('Storing extracted info into a dataframe')
-        df = pd.DataFrame()
-        df['ngo_name'] = [name]
-        df['unique_id'] = uid
-        df['registered_with'] = reg_with
-        df['type_of_ngo'] = ngo_type
-        df['registration_number'] = ngo_regno
-        df['copy_of_registration_certificate'] = rc_upload
-        df['copy_of_pan_card'] = pc_upload
-        df['act_name'] = act_name
-        df['city_of_registration'] = city_reg
-        df['state_of_registration'] = state_reg
-        df['registration_date'] = reg_date
-        df['key_issues'] = key_issues
-        df['operational_areas_states'] = operational_states
-        df['operational_areas_districts'] = operational_districts
-        df['FCRA_details'] = fcra_details
-        df['FCRA_registration_num'] = fcra_regno
-        df['details_of_achievement'] = details_achievement
-        df['contact_details_address'] = contact_address
-        df['contact_details_city'] = contact_city
-        df['contact_details_state'] = contact_state
-        df['contact_details_telephone'] = contact_telephone
-        df['contact_details_website'] = contact_website
-        df['contact_details_email'] = contact_email
-        df['members_names_designations'] = [member_name_designation_dict]
-        df['members_names_pan_availability'] = [member_name_pan_dict]
-        df['members_names_aadhar_availability'] = [member_name_aadhar_dict]
-        df['source_of_funds_amount_sanctioned'] = [year_amount_dict]
-        df['source_of_funds_department_name'] = [year_dept_dict]
-        df['source_of_funds_source'] = [year_source_dict]
-        df['source_of_funds_purpose'] = [year_purpose_dict]
-        df['sector_number'] = sector_num
-        df['ngo_num'] = i
-        df['page_num'] = page_num
-        df['page_num_total'] = len(ngos_on_page)
-#         print('Appending to dataframe for all NGOs...')
-        page_df = pd.concat([page_df,df]) # Alejandro-note: Use pandas.concat instead. Old method deprecated. page_df.append(df) 
+
+        df = pd.DataFrame({
+            'ngo_name': [name],
+            'unique_id': [uid],
+            'registered_with': [reg_with],
+            'type_of_ngo': [ngo_type],
+            'registration_number': [ngo_regno],
+            'copy_of_registration_certificate': [rc_upload],
+            'copy_of_pan_card': [pc_upload],
+            'act_name': [act_name],
+            'city_of_registration': [city_reg],
+            'state_of_registration': [state_reg],
+            'registration_date': [reg_date],
+            'key_issues': [key_issues],
+            'operational_areas_states': [operational_states],
+            'operational_areas_districts': [operational_districts],
+            'FCRA_details': [fcra_details],
+            'FCRA_registration_num': [fcra_regno],
+            'details_of_achievement': [details_achievement],
+            'contact_details_address': [contact_address],
+            'contact_details_city': [contact_city],
+            'contact_details_state': [contact_state],
+            'contact_details_telephone': [contact_telephone],
+            'contact_details_website': [contact_website],
+            'contact_details_email': [contact_email],
+            'members_names_designations': [member_name_designation_dict],
+            'members_names_pan_availability': [member_name_pan_dict],
+            'members_names_aadhar_availability': [member_name_aadhar_dict],
+            'source_of_funds_amount_sanctioned': [year_amount_dict],
+            'source_of_funds_department_name': [year_dept_dict],
+            'source_of_funds_source': [year_source_dict],
+            'source_of_funds_purpose': [year_purpose_dict],
+            'sector_number': [sector_num],
+            'ngo_num': [i],
+            'page_num': [page_num],
+            'page_num_total': [len(ngos_on_page)]
+        })
+
+        page_df = pd.concat([page_df, df])
+
         page_df.to_csv(f'{store_directory}/sectorno_{sector_num}_pageno_{page_num}_ngo_scraping.csv', index=False)
-#         print('Closing pop-up window')
+
         close_button = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#ngo_info_modal > div.modal-dialog.modal-lg > div > div.modal-header > button')))
-        time.sleep(2)
+        time.sleep(3)
         close_button.click()
     # drivers_dict[threading.current_thread().name].quit()
     return page_df
