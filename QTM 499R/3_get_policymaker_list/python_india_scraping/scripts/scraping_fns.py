@@ -169,9 +169,9 @@ def scrape_a_single_page(sector_num, page_num):
 
 #-------------------------------------------------------------------------------------------------------------------------
 
-def scrape_a_sector(sector_num): 
+def scrape_a_sector(sector_num, driver): 
     sector_url = sector_urls[sector_num]
-    total_pages = get_num_of_pages_for_sector(sector_num)
+    total_pages = get_num_of_pages_for_sector(sector_num, driver)
     sector_df = pd.DataFrame()
     unsuccessful_pages= pd.DataFrame()
     for page in tqdm(range(1, total_pages+1)):
@@ -237,7 +237,7 @@ def scrape_list_singleplage(sector_num,page_num,driver):
 
 #-------------------------------------------------------------------------------------------------------------------------
 
-
+# Will be used for 
 def scrape_list_ngo_sector(sector_num): 
     print(f'Scraping sector number {sector_num}')  
     sector_url = sector_urls[sector_num]
@@ -279,7 +279,6 @@ def scrape_list_ngo_sector(sector_num):
 
 #-------------------------------------------------------------------------------------------------------------------------
 
-
 def scrape_multiple_pages(sector_num, start_page_num, end_page_num): 
     page_list = list(range(start_page_num, end_page_num+1))
     main_df = pd.DataFrame()
@@ -301,3 +300,29 @@ def scrape_multiple_pages(sector_num, start_page_num, end_page_num):
             unsuccessful_pages = pd.concat([unsuccessful_pages,temp_df]) # Alejandro-note: Use pandas.concat instead. Old method deprecated. unsuccessful_pages.append(temp_df) 
             unsuccessful_pages.to_csv('./unsuccessfully_scraped_pages_sector{sector_num}_page{page}.csv', index=False)
             continue
+
+#-------------------------------------------------------------------------------------------------------------------------
+
+#--- Creating a function to compare NGOs to check for potentially missing information.
+#--- This function uses scrape_list_singlepage and scrape_a_single_page then compares
+#--- NGO names to see if some NGOs may have not been fully scraped/skipped.
+
+#--- parameters are two dataframes. One from front page information and the other from clicked NGO information.
+def compare_ngo_information(df_front, df_click):
+    # df_front = scrape_list_singleplage(sector_num, page_num, driver) # only takes into account information without click
+    # df_click = scrape_a_single_page(sector_num, page_num) # clicks NGO and scrapes information
+    unsuccessful_ngo = pd.DataFrame()
+
+    for index, row in df_front.iterrows():
+        if row['ngo_name'] not in df_click['ngo_name'].values:
+            new_row = row[['ngo_name', 'ngo_hyperlink', 'sector_num', 'page_num', 'index_in_page']] 
+            unsuccessful_ngo = unsuccessful_ngo.append(new_row)
+            # unsuccessful_ngo = pd.concat([unsuccessful_ngo, pd.DataFrame([row['ngo_name']])])
+    
+    if len(unsuccessful_ngo) == 0:
+        print("All NGOs for this sector and page were properly scraped.")
+
+    return unsuccessful_ngo
+
+
+
