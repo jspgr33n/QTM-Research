@@ -3,7 +3,8 @@
 
 #--- This function extracts the page url for a specific sector + page number
 def get_page_url(sector_url, page_num):
-    page_url = sector_url.split('?',1)[0][:-1]+f'{page_num}?per_page=100'
+    # page_url = sector_url.split('?',1)[0][:-1]+f'{page_num}?per_page=100'
+    page_url = sector_url.split('?',1)[0][:-1]+f'{page_num}?per_page=20' # for shorter tests
     return page_url
 
 #-------------------------------------------------------------------------------------------------------------------------
@@ -12,9 +13,9 @@ def get_page_url(sector_url, page_num):
 def get_sector_urls(base_url): 
     driver.get(base_url)
     sector_urls = [url.get_attribute('href') for url in driver.find_elements(By.CLASS_NAME, 'bluelink11px')]
-    sector_urls = [url+'?per_page=100' for url in sector_urls]
+    # sector_urls = [url+'?per_page=100' for url in sector_urls]
+    sector_urls = [url+'?per_page=20' for url in sector_urls] # for shorter tests
     return sector_urls
-
 
 #-------------------------------------------------------------------------------------------------------------------------
 
