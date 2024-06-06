@@ -4,7 +4,7 @@
 #--- This function extracts the page url for a specific sector + page number
 def get_page_url(sector_url, page_num):
     # page_url = sector_url.split('?',1)[0][:-1]+f'{page_num}?per_page=100'
-    page_url = sector_url.split('?',1)[0][:-1]+f'{page_num}?per_page=20' # for shorter tests
+    page_url = sector_url.split('?',1)[0][:-1]+f'{page_num}?per_page=10' # for shorter tests
     return page_url
 
 #-------------------------------------------------------------------------------------------------------------------------
@@ -14,7 +14,7 @@ def get_sector_urls(base_url):
     driver.get(base_url)
     sector_urls = [url.get_attribute('href') for url in driver.find_elements(By.CLASS_NAME, 'bluelink11px')]
     # sector_urls = [url+'?per_page=100' for url in sector_urls]
-    sector_urls = [url+'?per_page=20' for url in sector_urls] # for shorter tests
+    sector_urls = [url+'?per_page=10' for url in sector_urls] # for shorter tests
     return sector_urls
 
 #-------------------------------------------------------------------------------------------------------------------------
@@ -42,7 +42,7 @@ def get_num_of_pages_for_sector(sector_num,driver):
 
 #--- This function takes a list of NGO's per page, clicks through them sequentially,
 #--- and extracts information from pop-up.
-def scrape_a_single_page(sector_num, page_num): 
+def scrape_a_single_page(sector_num, page_num, df_front): 
     
     # The following code selects a web_driver from the dictionary.
     # Both "drivers_dict" and "max_workers are defined in the environment."
@@ -65,9 +65,10 @@ def scrape_a_single_page(sector_num, page_num):
     driver.get(page_url)
     time.sleep(3)
     ngos_on_page = driver.find_elements(By.XPATH, "//a[contains(@onclick,'show_ngo_info')]")
+
     page_df =   pd.DataFrame()
 
-    # call the scrape front page: CHeck or Add whether it has the clicking links
+    # Call the scrape front page: Check or Add whether it has the clicking links
     # Create a for loop with 3 attempts.
     # In iteration 1:
     # (a) ngos_on_page starts with the full list
@@ -76,35 +77,47 @@ def scrape_a_single_page(sector_num, page_num):
     # One minor detail to change with this procedure, is referencing the ngo number with "i".
     # (it's not going to work) - maybe remove it?
 
+    #-------- OLD FOR LOOP
 
-    for i in range(0, len(ngos_on_page)):
-        print(f'scraping NGO number {i+1}')
-        ngo = ngos_on_page[i]
-        df  = scrape_single_ngo(driver, ngo, sector_num, page_num,i)
-        page_df = pd.concat([page_df, df])
+    # for i in range(0, len(ngos_on_page)):
+    #     print(f'scraping NGO number {i+1}')
+    #     ngo = ngos_on_page[i]
+    #     df  = scrape_single_ngo(driver, ngo, sector_num, page_num, i)
+    #     page_df = pd.concat([page_df, df])
 
-         
-    # for iteration in range(0:4):
-    #     for i in range(0, len(ngos_on_page)):
-    #         print(f'scraping NGO number {i+1}')
-    #         ngo = ngos_on_page[i]
-    #         df  = scrape_single_ngo(driver, ngo, sector_num, page_num,i)
-    #         page_df = pd.concat([page_df, df])
+    #-------- NEW FOR LOOP
 
-    #         page_df.to_csv(f'{store_directory}/sectorno_{sector_num}_pageno_{page_num}_ngo_scraping.csv', index=False)
-    #     # ngos_on_page = difference between page_df and df_front
+    print(len(ngos_on_page))
+    for iteration in range(3):
+        if len(ngos_on_page) == 0:
+            break
+        
+        if iteration > 0:
+            print(f"Attempt failed, trying once more... (max 3 times, current count: {iteration+1})")
 
+        for i in range(0, len(ngos_on_page)-2):
+            print(f'scraping NGO number {i+1}')
+            ngo     = ngos_on_page[i]
+            if iteration == 0:      
+                df_click = scrape_single_ngo(driver, ngo, sector_num, page_num, i)
+            else:
+                df_click = scrape_single_ngo(driver, ngo, sector_num, page_num, ngo['ngo_num'].iloc[i]) # ngo has ngo_num column which shows the ngo index number for that page.
+            page_df = pd.concat([page_df, df_click])
+        
+        #---- Difference between page_df and ngos_on_page
+        ngos_on_page = compare_ngo_information(df_front, page_df)
+
+    if len(ngos_on_page) > 0:
+        print(f"Some NGOs were not properly scraped. Review sector {sector_num} and page {page_num}.")
+        ngos_on_page.to_csv(f'{store_directory}/unsuccessful/sectorno_{sector_num}_pageno_{page_num}_ngo_scraping_unsuccessful.csv', index=False)
 
     page_df.to_csv(f'{store_directory}/sectorno_{sector_num}_pageno_{page_num}_ngo_scraping.csv', index=False)
    
-
-
-    # drivers_dict[threading.current_thread().name].quit()
     return page_df
 
 #------------------------------------------------------------------------------------------------------------------------
 
-def scrape_single_ngo(driver, ngo,sector_num,page_num,ngo_num):
+def scrape_single_ngo(driver, ngo, sector_num, page_num, ngo_num):
 
     time.sleep(2)
     ngo.click()
@@ -191,7 +204,6 @@ def scrape_single_ngo(driver, ngo,sector_num,page_num,ngo_num):
         'sector_number': [sector_num],
         'ngo_num': [ngo_num],
         'page_num': [page_num]
-#        'page_num_total': [len(ngos_on_page)]
     })
 
     close_button = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#ngo_info_modal > div.modal-dialog.modal-lg > div > div.modal-header > button')))
@@ -206,29 +218,34 @@ def scrape_a_sector(sector_num, driver):
     sector_url = sector_urls[sector_num]
     total_pages = get_num_of_pages_for_sector(sector_num, driver)
     sector_df = pd.DataFrame()
-    unsuccessful_pages= pd.DataFrame()
+    # unsuccessful_pages= pd.DataFrame()
     for page in tqdm(range(1, total_pages+1)):
         print(f'Scraping page number {page}')
         page_url = get_page_url(sector_url, page)
         print(f'Scraping {page_url}')
         try: 
-            page_df = scrape_a_single_page(sector_num, page_num= page)
+            df_front = scrape_list_singlepage(sector_num, page, driver)
+            page_df = scrape_a_single_page(sector_num, page, df_front)
             sector_df = pd.concat([sector_df,page_df]) # Alejandro-note: Use pandas.concat instead. Old method deprecated. sector_df.append(page_df)
             print(f'Page number {page} of {total_pages} finished')
         except Exception as e: 
             print(f'Exception {e} occurred for sector number {0} and page number {page}' )
-            temp_df = pd.DataFrame()
-            temp_df['sector_num'] = [sector_num]
-            temp_df['page_url'] =page_url
-            unsuccessful_pages = unsuccessful_pages.append(temp_df)
-            unsuccessful_pages.to_csv(f'{store_directory}/unsuccessfully_scraped_pages.csv', index=False)
+            # temp_df = pd.DataFrame()
+            # temp_df['sector_num'] = [sector_num]
+            # temp_df['page_url'] =page_url
+            # unsuccessful_pages = unsuccessful_pages.append(temp_df)
+            # unsuccessful_pages.to_csv(f'{store_directory}/unsuccessfully_scraped_pages.csv', index=False)
             continue
+    
+    # Saving whole sector dataframe to csv
+    sector_df.to_csv(f'{store_directory}/whole_sectors/sectorno_{sector_num}_ngo_scraping.csv', index=False)
+
     return sector_df
 
 #-------------------------------------------------------------------------------------------------------------------------
 
 # Scrape the list of ngos in each page
-def scrape_list_singleplage(sector_num,page_num,driver): 
+def scrape_list_singlepage(sector_num, page_num, driver): 
     
     sector_url = sector_urls[sector_num]
     page_url   = get_page_url(sector_url, page_num)
@@ -256,7 +273,7 @@ def scrape_list_singleplage(sector_num,page_num,driver):
 
     page_df['sector_num']       = [sector_num for i in range(0,len(ngo_numinpage))]
     page_df['page_num']         = [page_num for i in range(0,len(ngo_numinpage))]
-    page_df['index_in_page']    = [i for i in range(0,len(ngo_numinpage))]
+    page_df['ngo_num']    = [i for i in range(0,len(ngo_numinpage))]
     page_df['ngo_name']         = ngo_names
     page_df['ngo_hyperlink']    = ngo_hyperlink
     page_df['ngo_registration'] = ngo_registration
@@ -271,7 +288,6 @@ def scrape_list_singleplage(sector_num,page_num,driver):
 
 #-------------------------------------------------------------------------------------------------------------------------
 
-# Will be used for 
 def scrape_list_ngo_sector(sector_num): 
     print(f'Scraping sector number {sector_num}')  
     sector_url = sector_urls[sector_num]
@@ -303,8 +319,8 @@ def scrape_list_ngo_sector(sector_num):
     for page in tqdm(range(1, total_pages+1)):
         print(f'Scraping Sector {sector_num}, page number {page}')
         page_url = get_page_url(sector_url, page)
-        #print(f'Scraping {page_url}')
-        page_df = scrape_list_singleplage(sector_num, page_num= page,driver=driver)
+        print(f'Scraping {page_url}')
+        page_df = scrape_list_singlepage(sector_num, page, driver)
         sector_df = pd.concat([sector_df,page_df])
 
     sector_df.to_csv(f'{store_directory}/list_sectorno_{sector_num}_ngo_scraping.csv', index=False)    
@@ -313,10 +329,9 @@ def scrape_list_ngo_sector(sector_num):
 
 #-------------------------------------------------------------------------------------------------------------------------
 
-def scrape_multiple_pages(sector_num, start_page_num, end_page_num): 
+def scrape_multiple_pages(sector_num, start_page_num, end_page_num, driver): 
     page_list = list(range(start_page_num, end_page_num+1))
     main_df = pd.DataFrame()
-    unsuccessful_pages = pd.DataFrame()
     sector_url = sector_urls[sector_num]
     # The "tqdm" command helps us keep track of progress.
     for page in tqdm(page_list): 
@@ -324,15 +339,16 @@ def scrape_multiple_pages(sector_num, start_page_num, end_page_num):
         page_url = get_page_url(sector_url, page)
         print(f'Scraping {page_url}')
         try: 
-            page_df = scrape_a_single_page(sector_num, page_num= page)
+            df_front = scrape_list_singlepage(sector_num, page, driver)
+            page_df = scrape_a_single_page(sector_num, page, df_front)
             main_df = pd.concat([main_df,page_df]) # Alejandro-note: Use pandas.concat instead. Old method deprecated. main_df.append(page_df)
         except Exception as e: 
             print(f'Exception {e} occurred for sector number {0} and page number {page}' )
-            temp_df = pd.DataFrame()
-            temp_df['sector_num'] = [sector_num]
-            temp_df['page_url'] =page_url
-            unsuccessful_pages = pd.concat([unsuccessful_pages,temp_df]) # Alejandro-note: Use pandas.concat instead. Old method deprecated. unsuccessful_pages.append(temp_df) 
-            unsuccessful_pages.to_csv('./unsuccessfully_scraped_pages_sector{sector_num}_page{page}.csv', index=False)
+            # temp_df = pd.DataFrame()
+            # temp_df['sector_num'] = [sector_num]
+            # temp_df['page_url'] =page_url
+            # unsuccessful_pages = pd.concat([unsuccessful_pages,temp_df]) # Alejandro-note: Use pandas.concat instead. Old method deprecated. unsuccessful_pages.append(temp_df) 
+            # unsuccessful_pages.to_csv('./unsuccessfully_scraped_pages_sector{sector_num}_page{page}.csv', index=False)
             continue
 
 #-------------------------------------------------------------------------------------------------------------------------
@@ -343,18 +359,9 @@ def scrape_multiple_pages(sector_num, start_page_num, end_page_num):
 
 #--- parameters are two dataframes. One from front page information and the other from clicked NGO information.
 def compare_ngo_information(df_front, df_click):
-
     list_ngos_click  = df_click["ngo_name"].to_list()
     unsuccessful_ngo = df_front.query('not(ngo_name in @list_ngos_click)')
 
-    # unsuccessful_ngo = pd.DataFrame()
-
-    # for index, row in df_front.iterrows():
-    #     if row['ngo_name'] not in df_click['ngo_name'].values:
-    #         new_row = row[['ngo_name', 'ngo_hyperlink', 'sector_num', 'page_num', 'index_in_page']] 
-    #         # unsuccessful_ngo = unsuccessful_ngo.append(new_row)
-    #         unsuccessful_ngo = pd.concat([unsuccessful_ngo, new_row])
-    
     if len(unsuccessful_ngo) == 0:
          print("All NGOs for this sector and page were properly scraped.")
 
